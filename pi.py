@@ -28,9 +28,11 @@ if __name__ == "__main__":
     """
     spark = SparkSession\
         .builder\
-        .appName("PythonPi")\
+        .appName("DarionicPythonPi")\
         .getOrCreate()
 
+    print("darionic's example: pi")
+    
     partitions = int(sys.argv[1]) if len(sys.argv) > 1 else 2
     n = 100000 * partitions
 
