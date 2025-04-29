@@ -45,7 +45,7 @@ if __name__ == "__main__":
     print("darionic's example: sleeper")
     print("sleeping for 60 sec")
 
-    time.sleep(60)
+    time.sleep(90)
     
     print("Pi is roughly %f" % (4.0 * count / n))
     print("stopping application")
