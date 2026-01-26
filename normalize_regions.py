@@ -20,6 +20,7 @@ from operator import add
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import row_number
+from pyspark.sql.window import Window
 from pyspark.sql.types import *
 
 
@@ -50,7 +51,8 @@ if __name__ == "__main__":
     source_df.show()
 
     # add incremental row id
-    source_with_id = source_df.withColumn("id", row_number())
+    windowSpec = Window.partitionBy("cell_id")
+    source_with_id = source_df.withColumn("id", row_number().over(windowSpec))
 
     # create regions df
     normalized_regions = source_with_id.select("id", "region", "province", "latitude", "longitude")
