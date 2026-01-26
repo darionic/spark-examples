@@ -51,7 +51,8 @@ if __name__ == "__main__":
     source_df.show()
 
     # add incremental row id
-    windowSpec = Window.partitionBy("cell_id").orderBy("region")
+    # windowSpec = Window.partitionBy("cell_id").orderBy("region")
+    windowSpec = Window.orderBy("cell_id")
     source_with_id = source_df.withColumn("id", row_number().over(windowSpec))
 
     # create regions df
