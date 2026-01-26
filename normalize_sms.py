@@ -56,7 +56,7 @@ if __name__ == "__main__":
     # Create Target Table if it doesn't exist
     # This is where we define the Daily Partitioning strategy
     spark.sql(f"""
-        CREATE TABLE IF NOT EXISTS sms_data (
+        CREATE TABLE IF NOT EXISTS iceberg_catalog.silver_layer.sms_data (
             timestamp TIMESTAMP,
             sms_id STRING,
             sender_msisdn STRING,
