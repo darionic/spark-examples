@@ -57,7 +57,7 @@ if __name__ == "__main__":
     # This is where we define the Daily Partitioning strategy
     spark.sql(f"""
         CREATE TABLE IF NOT EXISTS iceberg_catalog.silver_layer.sms_data (
-            timestamp TIMESTAMP,
+            ts TIMESTAMP,
             sms_id STRING,
             sender_msisdn STRING,
             receiver_msisdn STRING,
@@ -69,7 +69,7 @@ if __name__ == "__main__":
             charging_amount DECIMAL(7,2)
         )
         USING iceberg
-        PARTITIONED BY (days(timestamp))
+        PARTITIONED BY (days(ts))
     """)
 
     # load towers table
@@ -79,7 +79,7 @@ if __name__ == "__main__":
         MERGE INTO iceberg_catalog.silver_layer.sms_data AS target
         USING incoming_batch AS source
         ON target.sms_id = source.sms_id 
-        AND target.timestamp = source.timestamp
+        AND target.ts = source.timestamp
         WHEN NOT MATCHED THEN
             INSERT *
     """)
