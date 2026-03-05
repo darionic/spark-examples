@@ -248,7 +248,7 @@ def run() -> None:
         )
         .select("data.*")                   # flatten nested struct
         # Watermark for stateful late-data handling (30-minute tolerance)
-        .withWatermark("timestamp", "30 minutes")
+        # .withWatermark("timestamp", "30 minutes")
     )
 
     # ── 3. Transform ──────────────────────────────────────────────────────
