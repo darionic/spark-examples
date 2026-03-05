@@ -34,7 +34,7 @@ KAFKA_BOOTSTRAP_SERVERS = "48.32.91.42:9092"          # e.g. "broker1:9092,broke
 KAFKA_TOPIC             = "voice_cdr_mali"
 KAFKA_STARTING_OFFSETS  = "latest"                  # "earliest" for backfill
 
-S3_WAREHOUSE_PATH       = "s3://testlake/warehouse/"
+S3_WAREHOUSE_PATH       = "s3a://testlake/warehouse/"
 ICEBERG_CATALOG         = "iceberg_catalog"                    # or "hadoop" / "rest"
 ICEBERG_DATABASE        = "orange_cdr_silver"
 ICEBERG_TABLE           = "voice_cdr_normalized"
