@@ -84,7 +84,7 @@ if __name__ == "__main__":
     # Create Target Table if it doesn't exist
     # This is where we define the Daily Partitioning strategy
     spark.sql(f"""
-        CREATE TABLE IF NOT EXISTS iceberg_catalog.silver_layer.sms_data (
+        CREATE TABLE IF NOT EXISTS iceberg_catalog.orange_cdr_silver.normalized_sms (
             timestamp TIMESTAMP,
             sms_id STRING,
             sender_msisdn STRING,
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     # add a row ONLY if the conditions are met: different sms_id and different cell_id
 
     spark.sql("""
-        MERGE INTO iceberg_catalog.silver_layer.sms_data AS target
+        MERGE INTO iceberg_catalog.orange_cdr_silver.normalized_sms AS target
         USING incoming_batch AS source
         ON target.sms_id = source.sms_id 
         AND target.cell_id = source.cell_id
