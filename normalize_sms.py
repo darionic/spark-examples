@@ -48,8 +48,11 @@ if __name__ == "__main__":
         StructField("currency", StringType(), True),
     ])
 
-    # read raw source
-    source_df = spark.read.csv("s3a://raw/sms_cdr_mali.csv", header=True, schema=schema)
+    # read raw source (single file)
+    # source_df = spark.read.csv("s3a://raw/sms_cdr_mali.csv", header=True, schema=schema)
+    
+    # read raw source (multiple files)
+    source_df = spark.read.load("s3a://raw", format="csv", pathGlobFilter="sms_cdr_mali_*.csv", header=True, schema=schema)
     source_df.show()
 
     source_df \
@@ -114,6 +117,6 @@ if __name__ == "__main__":
     """)
 
     # read table from catalog to test
-    spark.sql("select * from iceberg_catalog.silver_layer.sms_data limit 10").show()
+    spark.sql("select * from iceberg_catalog.orange_cdr_silver.normalized_sms limit 10").show()
 
     spark.stop()
