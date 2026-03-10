@@ -67,11 +67,11 @@ if __name__ == "__main__":
 
     # save results on icerberg catalog (data lakehouse)
 
-    spark.sql("CREATE DATABASE IF NOT EXISTS iceberg_catalog.silver_layer")
-    normalized_regions.write.format("iceberg").mode(saveMode="overwrite").saveAsTable("iceberg_catalog.silver_layer.regions")
-    towers.write.format("iceberg").mode(saveMode="overwrite").saveAsTable("iceberg_catalog.silver_layer.towers")
+    spark.sql("CREATE DATABASE IF NOT EXISTS iceberg_catalog.orange_cdr_silver")
+    normalized_regions.write.format("iceberg").mode(saveMode="overwrite").saveAsTable("iceberg_catalog.orange_cdr_silver.regions")
+    towers.write.format("iceberg").mode(saveMode="overwrite").saveAsTable("iceberg_catalog.orange_cdr_silver.towers")
 
     # read table from catalog
-    spark.sql("select * from iceberg_catalog.silver_layer.towers").show()
+    spark.sql("select * from iceberg_catalog.orange_cdr_silver.towers").show()
 
     spark.stop()
