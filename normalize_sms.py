@@ -52,7 +52,7 @@ if __name__ == "__main__":
     # source_df = spark.read.csv("s3a://raw/sms_cdr_mali.csv", header=True, schema=schema)
     
     # read raw source (multiple files)
-    source_df = spark.read.load("s3a://raw", format="csv", pathGlobFilter="sms_cdr_mali_*.csv", header=True, schema=schema)
+    source_df = spark.read.load("s3a://raw/", format="csv", pathGlobFilter="sms_cdr_mali_*.csv", header=True, schema=schema)
     source_df.show()
 
     source_df \
