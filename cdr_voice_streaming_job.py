@@ -65,7 +65,7 @@ SOURCE_SCHEMA = StructType([
     StructField("cell_id",            StringType(),    nullable=True),
     StructField("region",             StringType(),    nullable=True),   # will be dropped
     StructField("termination_reason", StringType(),    nullable=True),
-    StructField("charging_amount",    DecimalType(12, 6), nullable=True), # raw precision
+    StructField("charging_amount",    DecimalType(7, 2), nullable=True), # raw precision
     StructField("currency",           StringType(),    nullable=True),
 ])
 
@@ -157,18 +157,27 @@ def transform(raw_df):
 
         # ── 2. Compute raw USD amount (full precision) ────────────────────
         .withColumn(
-            "_usd_raw",
-            normalise_udf(F.col("charging_amount"), F.col("currency"))
+            "currency", 
+            F.when((F.col("currency") == "") | (F.col("currency").isNull()), "XOF")
+            .otherwise(F.col("currency"))
+        ).withColumn(
+            "charging_amount",
+            F.when(F.col("currency") == "EUR", F.round(F.col("charging_amount") / 0.92, 2))
+            .when(F.col("currency") == "XOF", F.round(F.col("charging_amount") / 610.0, 2))
+            .otherwise(F.col("charging_amount"))
+        ).withColumn(
+            "currency", 
+            F.lit("USD")
         )
 
         # ── 3. Enforce DECIMAL(7, 2) and rename ───────────────────────────
         .withColumn(
             "charging_amount_usd",
-            F.col("_usd_raw").cast(DecimalType(7, 2))
+            F.col("charging_amount").cast(DecimalType(7, 2))
         )
 
         # ── 4. Drop source monetary columns and temp column ───────────────
-        .drop("charging_amount", "_usd_raw")
+        .drop("charging_amount")
 
         # ── 5. Light deduplication within the batch ───────────────────────
         .dropDuplicates(["call_id"])
