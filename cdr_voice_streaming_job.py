@@ -35,12 +35,14 @@ KAFKA_TOPIC             = "voice_cdr_mali"
 KAFKA_STARTING_OFFSETS  = "latest"                  # "earliest" for backfill
 
 S3_WAREHOUSE_PATH       = "s3a://testlake/warehouse/"
-ICEBERG_CATALOG         = "iceberg_catalog"                    # or "hadoop" / "rest"
+ICEBERG_CATALOG         = "iceberg_catalog"
 ICEBERG_DATABASE        = "orange_cdr_silver"
 ICEBERG_TABLE           = "voice_cdr_normalized"
 ICEBERG_TABLE_FQN       = f"{ICEBERG_DATABASE}.{ICEBERG_TABLE}"
+ICEBERG_RAW_TABLE_FQN       = f"orange_cdr_bronze.{KAFKA_TOPIC}"
 
 CHECKPOINT_LOCATION     = f"{S3_WAREHOUSE_PATH}/_checkpoints/{ICEBERG_TABLE}"
+CHECKPOINT_LOCATION_RAW     = f"{S3_WAREHOUSE_PATH}/_checkpoints/{KAFKA_TOPIC}"
 
 TRIGGER_INTERVAL        = "10 seconds"              # micro-batch cadence
 OUTPUT_MODE             = "append"
@@ -201,6 +203,26 @@ def transform(raw_df):
     )
 
 
+def foreach_batch_sink_raw(batch_df, batch_id: int) -> None:
+    """
+    foreachBatch sink — enables Iceberg MERGE / upsert semantics and gives
+    full control over write options per micro-batch.
+    """
+    count = batch_df.count()
+    if count == 0:
+        logger.info("Batch %d — empty, skipping write.", batch_id)
+        return
+
+    logger.info("Batch %d — writing %d records to Iceberg.", batch_id, count)
+
+    (
+        batch_df.writeTo(f"{ICEBERG_CATALOG}.{ICEBERG_RAW_TABLE_FQN}")
+        .option("fanout-enabled", "true")   # allow out-of-order partition writes
+        .append()
+    )
+    logger.info("Batch %d — committed.", batch_id)
+
+
 def foreach_batch_sink(batch_df, batch_id: int) -> None:
     """
     foreachBatch sink — enables Iceberg MERGE / upsert semantics and gives
@@ -275,11 +297,28 @@ def run() -> None:
         .start()
     )
 
+    query_raw = (
+        parsed_df.writeStream
+        .format("iceberg")
+        .outputMode(OUTPUT_MODE)
+        .trigger(processingTime=TRIGGER_INTERVAL)
+        .option("path", f"{ICEBERG_CATALOG}.{ICEBERG_RAW_TABLE_FQN}")
+        .option("checkpointLocation", CHECKPOINT_LOCATION)
+        .foreachBatch(foreach_batch_sink_raw)
+        .start()
+    )
+
     logger.info(
         "Streaming query started — id=%s, runId=%s",
         query.id, query.runId,
     )
     query.awaitTermination()
+
+    logger.info(
+        "Streaming query raw started — id=%s, runId=%s",
+        query_raw.id, query_raw.runId,
+    )
+    query_raw.awaitTermination()
 
 
 if __name__ == "__main__":
