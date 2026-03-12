@@ -110,7 +110,7 @@ if __name__ == "__main__":
     spark.sql("""
         MERGE INTO iceberg_catalog.orange_cdr_silver.normalized_data AS target
         USING incoming_batch AS source
-        ON target.sms_id = source.sms_id 
+        ON target.session_id = source.session_id 
         AND target.cell_id = source.cell_id
         WHEN NOT MATCHED THEN
             INSERT *
