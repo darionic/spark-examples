@@ -112,6 +112,7 @@ def create_iceberg_table_if_not_exists(spark: SparkSession) -> None:
             'write.metadata.delete-after-commit.enabled' = 'true',
             'write.metadata.previous-versions-max'       = '10'
         );
+        
         CREATE TABLE IF NOT EXISTS {ICEBERG_CATALOG}.{ICEBERG_RAW_TABLE_FQN} (
             timestamp           TIMESTAMP,
             call_id             STRING        NOT NULL,
@@ -125,7 +126,7 @@ def create_iceberg_table_if_not_exists(spark: SparkSession) -> None:
             charging_amount DECIMAL(7, 2),
             currency            STRING
         )
-        USING iceberg
+        USING iceberg;
     """
 
     logger.info("Ensuring Iceberg table exists: %s.%s", ICEBERG_CATALOG, ICEBERG_TABLE_FQN)
