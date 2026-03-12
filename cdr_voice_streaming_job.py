@@ -88,6 +88,7 @@ def create_iceberg_table_if_not_exists(spark: SparkSession) -> None:
     event timestamp to enable efficient time-range queries.
     """
     spark.sql(f"CREATE DATABASE IF NOT EXISTS {ICEBERG_CATALOG}.{ICEBERG_DATABASE}")
+    spark.sql(f"CREATE DATABASE IF NOT EXISTS {ICEBERG_CATALOG}.orange_cdr_bronze")
 
     ddl = f"""
         CREATE TABLE IF NOT EXISTS {ICEBERG_CATALOG}.{ICEBERG_TABLE_FQN} (
@@ -111,7 +112,22 @@ def create_iceberg_table_if_not_exists(spark: SparkSession) -> None:
             'write.metadata.delete-after-commit.enabled' = 'true',
             'write.metadata.previous-versions-max'       = '10'
         )
+        CREATE TABLE IF NOT EXISTS {ICEBERG_CATALOG}.{ICEBERG_RAW_TABLE_FQN} (
+            timestamp           TIMESTAMP,
+            call_id             STRING        NOT NULL,
+            caller_msisdn       STRING,
+            callee_msisdn       STRING,
+            call_type           STRING,
+            duration_seconds    INT,
+            cell_id             STRING,
+            region              STRING,
+            termination_reason  STRING,
+            charging_amount DECIMAL(7, 2),
+            currency            STRING
+        )
+        USING iceberg
     """
+
     logger.info("Ensuring Iceberg table exists: %s.%s", ICEBERG_CATALOG, ICEBERG_TABLE_FQN)
     spark.sql(ddl)
     logger.info("Table ready.")
