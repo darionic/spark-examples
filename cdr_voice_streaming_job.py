@@ -111,7 +111,7 @@ def create_iceberg_table_if_not_exists(spark: SparkSession) -> None:
             'write.parquet.compression-codec' = 'snappy',
             'write.metadata.delete-after-commit.enabled' = 'true',
             'write.metadata.previous-versions-max'       = '10'
-        )
+        );
         CREATE TABLE IF NOT EXISTS {ICEBERG_CATALOG}.{ICEBERG_RAW_TABLE_FQN} (
             timestamp           TIMESTAMP,
             call_id             STRING        NOT NULL,
