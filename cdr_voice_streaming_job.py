@@ -230,17 +230,17 @@ def foreach_batch_sink_raw(batch_df, batch_id: int) -> None:
     """
     count = batch_df.count()
     if count == 0:
-        logger.info("Batch %d — empty, skipping write.", batch_id)
+        logger.info("Batch %d — empty, skipping RAW write.", batch_id)
         return
 
-    logger.info("Batch %d — writing %d records to Iceberg.", batch_id, count)
+    logger.info("RAW Batch %d — writing %d records to Iceberg.", batch_id, count)
 
     (
         batch_df.writeTo(f"{ICEBERG_CATALOG}.{ICEBERG_RAW_TABLE_FQN}")
         .option("fanout-enabled", "true")   # allow out-of-order partition writes
         .append()
     )
-    logger.info("Batch %d — committed.", batch_id)
+    logger.info("RAW Batch %d — committed.", batch_id)
 
 
 def foreach_batch_sink(batch_df, batch_id: int) -> None:
@@ -323,7 +323,7 @@ def run() -> None:
         .outputMode(OUTPUT_MODE)
         .trigger(processingTime=TRIGGER_INTERVAL)
         .option("path", f"{ICEBERG_CATALOG}.{ICEBERG_RAW_TABLE_FQN}")
-        .option("checkpointLocation", CHECKPOINT_LOCATION)
+        .option("checkpointLocation", CHECKPOINT_LOCATION_RAW)
         .foreachBatch(foreach_batch_sink_raw)
         .start()
     )
